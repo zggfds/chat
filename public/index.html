@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Онлайн-чат с фото и сохранением</title>
+  <style>
+    body { margin: 0; padding-bottom: 3rem; font-family: sans-serif; }
+    #messages { list-style-type: none; margin: 0; padding: 0; }
+    #messages li { padding: 0.5rem 1rem; border-bottom: 1px solid #eee; }
+    #messages li:nth-child(odd) { background: #efefef; }
+    #form { background: #000; padding: 0.25rem; position: fixed; bottom: 0; left: 0; right: 0; display: flex; height: 3rem; box-sizing: border-box; }
+    #input { border: none; padding: 0 1rem; flex-grow: 1; margin: 0.25rem; border-radius: 2rem; }
+    #input:focus { outline: none; }
+    #form button, #form label { background: #333; border: none; padding: 0 1rem; margin: 0.25rem; border-radius: 2rem; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+    #file-input { display: none; } 
+    .message-content img { max-width: 250px; height: auto; border-radius: 5px; display: block; margin-top: 5px; }
+    .photo-message { background-color: #f0fff0; }
+    .timestamp { font-size: 0.75rem; color: #888; margin-right: 10px; }
+  </style>
+</head>
+<body>
+  <ul id="messages"></ul>
+  <form id="form">
+    <label for="file-input" title="Отправить фото">
+        📷
+        <input type="file" id="file-input" accept="image/*">
+    </label>
+    <input id="input" autocomplete="off" placeholder="Введите сообщение..." />
+    <button type="submit">Отправить</button>
+  </form>
+
+  <script src="/socket.io/socket.io.js"></script>
+
+  <script>
+    const socket = io();
+
+    const form = document.getElementById('form');
+    const input = document.getElementById('input');
+    const messages = document.getElementById('messages');
+    const fileInput = document.getElementById('file-input');
+    
+    function scrollToBottom() {
+      window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    // Функция для отображения сообщения (текст или фото)
+    function displayMessage(msg) {
+      const item = document.createElement('li');
+      const timeSpan = `<span class="timestamp">${msg.timestamp}</span>`;
+      let content = '';
+      
+      if (msg.type === 'text') {
+        content = `${msg.text}`;
+      } else if (msg.type === 'photo') {
+        // Создаем тег <img> с URL, который предоставил сервер
+        content = `
+          ${msg.text}
+          <div class="message-content">
+              <img src="${msg.url}" alt="Фото от участника">
+          </div>
+        `;
+        item.classList.add('photo-message');
+      }
+
+      item.innerHTML = timeSpan + content;
+      messages.appendChild(item);
+      scrollToBottom();
+    }
+
+    // 1. Обработка отправки текстового сообщения
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (input.value.trim()) {
+        socket.emit('chat message', input.value.trim());
+        input.value = '';
+      }
+    });
+
+    // 2. Обработка выбора файла (отправка на сервер через HTTP POST)
+    fileInput.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file || !file.type.startsWith('image/')) {
+             alert("Пожалуйста, выберите файл-изображение.");
+             return;
+        }
+
+        const formData = new FormData();
+        // 'photo' должно совпадать с именем поля в `upload.single('photo')` на сервере
+        formData.append('photo', file);
+
+        try {
+            const response = await fetch('/upload', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                throw new Error('Ошибка загрузки фото на сервер.');
+            }
+            // Сервер сам отправит сообщение всем через Socket.IO после сохранения
+
+        } catch (error) {
+            console.error('Ошибка:', error);
+            alert('Не удалось загрузить фото.');
+        } finally {
+            // Очистка input
+            fileInput.value = '';
+        }
+    });
+
+    // 3. Получение истории сообщений при подключении (перезагрузке)
+    socket.on('history', (history) => {
+        messages.innerHTML = ''; // Очистка перед загрузкой истории
+        history.forEach(msg => displayMessage(msg));
+    });
+
+    // 4. Получение новых сообщений от сервера (включая фото)
+    socket.on('chat message', (msg) => {
+      displayMessage(msg);
+    });
+  </script>
+</body>
+</html>
