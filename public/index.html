@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Эстетичный Фиолетовый Чат</title>
+  <title>Адаптивный Фиолетовый Чат</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
   <style>
     /* ------------------------------------------------------------------ */
     /* ОБЩИЕ СТИЛИ И ФОН (Фиолетовый паттерн) */
@@ -25,22 +26,22 @@
         );
       background-size: 20px 20px;
       background-attachment: fixed;
+      overflow-x: hidden; /* Предотвращаем горизонтальный скролл */
     }
 
     /* ------------------------------------------------------------------ */
-    /* КОНТЕЙНЕР ЧАТА (Центрирование и отступ для формы) */
+    /* КОНТЕЙНЕР ЧАТА (Базовые стили для мобильных устройств) */
     /* ------------------------------------------------------------------ */
     .chat-container {
-        max-width: 800px; 
+        /* На мобильных устройствах занимает всю ширину */
         width: 100%;
-        margin: 0 auto; 
+        margin: 0; /* Убираем центрирование на мобильных */
         flex-grow: 1;
-        display: flex;
-        flex-direction: column;
         padding-top: 10px;
         /* Отступ внизу, чтобы форма не перекрывала последнее сообщение */
         padding-bottom: 70px; 
         min-height: calc(100vh - 70px); 
+        box-sizing: border-box;
     }
 
     /* ------------------------------------------------------------------ */
@@ -57,22 +58,31 @@
       padding: 10px 15px;
       margin-bottom: 12px;
       border-radius: 18px; 
-      max-width: 65%; 
+      max-width: 85%; /* Больше ширины на мобильных */
       word-wrap: break-word;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-      /* Все сообщения по умолчанию (other-message) выравниваются влево */
-      margin-right: auto;
       background-color: #4a148c; 
       color: #e0e0e0;
+      margin-right: auto;
     }
     
+    /* 📸 Красивые стили для фото */
+    .message-content {
+        /* Убеждаемся, что контейнер фото не имеет лишних отступов */
+        display: block; 
+    }
     .message-content img {
       max-width: 100%;
       height: auto;
-      border-radius: 10px;
+      /* Убираем border-radius у фото, чтобы оно сливалось с bubble чата */
+      border-radius: 10px; 
       margin-top: 8px;
       display: block;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+      /* Добавляем границу, чтобы фото выглядело как отдельный объект */
+      border: 1px solid rgba(255, 255, 255, 0.2); 
+      object-fit: cover;
+      /* Убираем тень, тень от самого сообщения достаточна */
+      box-shadow: none; 
     }
     .timestamp {
       font-size: 0.7em;
@@ -87,24 +97,22 @@
     /* ------------------------------------------------------------------ */
     #form {
       background: rgba(0, 0, 0, 0.9);
-      padding: 10px 15px;
-      /* ИЗМЕНЕНИЕ: Жестко фиксируем внизу */
+      padding: 8px 10px; /* Уменьшаем отступы на мобильных */
       position: fixed; 
       bottom: 0;
       left: 0;
       right: 0;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 5px; /* Уменьшаем расстояние */
       box-sizing: border-box;
       border-top: 1px solid rgba(255, 255, 255, 0.1);
       backdrop-filter: blur(5px);
-      -webkit-backdrop-filter: blur(5px);
       z-index: 5;
     }
     #input {
       border: none;
-      padding: 12px 20px;
+      padding: 10px 15px; /* Уменьшаем вертикальный паддинг */
       flex-grow: 1;
       border-radius: 30px;
       background-color: rgba(255, 255, 255, 0.15);
@@ -112,27 +120,41 @@
       font-size: 1rem;
       box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4);
     }
-    #input:focus { outline: none; background-color: rgba(255, 255, 255, 0.25); }
     #form button, #form label {
       background: #c370e8;
       border: none;
-      padding: 12px 18px;
+      padding: 10px 15px; /* Уменьшаем паддинг кнопки */
       border-radius: 30px;
       color: #1a0033;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.1rem;
+      font-size: 1rem;
       font-weight: bold;
       box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
       transition: background-color 0.2s ease, transform 0.1s ease;
     }
-    #form button:hover, #form label:hover { background-color: #d193ed; transform: translateY(-1px); }
-    #file-input { display: none; } 
 
     /* ------------------------------------------------------------------ */
-    /* СТИЛИ ДЛЯ АНИМАЦИИ ЗАГРУЗКИ (Вращающийся квадрат) */
+    /* МЕДИАЗАПРОС (Стили для экранов шире 800px - для десктопов) */
+    /* ------------------------------------------------------------------ */
+    @media (min-width: 800px) {
+        .chat-container {
+            max-width: 800px; /* Ограничиваем ширину на десктопе */
+            margin: 0 auto; /* Центрируем на десктопе */
+        }
+        #form {
+             /* Ограничиваем ширину формы, чтобы она была только под чатом */
+            max-width: 800px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+    }
+
+
+    /* ------------------------------------------------------------------ */
+    /* СТИЛИ ДЛЯ АНИМАЦИИ И ПРЕДПРОСМОТРА (оставлены, как в предыдущей версии) */
     /* ------------------------------------------------------------------ */
     #loading-spinner {
         position: fixed;
@@ -141,7 +163,7 @@
         width: 100%;
         height: 100%;
         background: rgba(0, 0, 0, 0.7);
-        display: none; /* Скрыт по умолчанию */
+        display: none; 
         justify-content: center;
         align-items: center;
         flex-direction: column;
@@ -159,23 +181,14 @@
         animation: rotateSquare 1.5s infinite ease-in-out;
     }
     @keyframes rotateSquare {
-        0% {
-            transform: perspective(120px) rotateX(0deg) rotateY(0deg);
-        }
-        50% {
-            transform: perspective(120px) rotateX(-180deg) rotateY(0deg);
-        }
-        100% {
-            transform: perspective(120px) rotateX(-180deg) rotateY(-180deg);
-        }
+        0% { transform: perspective(120px) rotateX(0deg) rotateY(0deg); }
+        50% { transform: perspective(120px) rotateX(-180deg) rotateY(0deg); }
+        100% { transform: perspective(120px) rotateX(-180deg) rotateY(-180deg); }
     }
     
-    /* ------------------------------------------------------------------ */
-    /* СТИЛИ ДЛЯ ПРЕДПРОСМОТРА ФОТО */
-    /* ------------------------------------------------------------------ */
     #preview-container {
         position: fixed;
-        bottom: calc(70px + 15px); /* Над формой + отступ */
+        bottom: calc(70px + 15px); 
         left: 50%;
         transform: translateX(-50%);
         background-color: rgba(0, 0, 0, 0.9);
@@ -247,6 +260,9 @@
   <script src="/socket.io/socket.io.js"></script>
 
   <script>
+    // **********************************************
+    // JS-ЛОГИКА (ОСТАЕТСЯ БЕЗ ИЗМЕНЕНИЙ)
+    // **********************************************
     const socket = io();
     const form = document.getElementById('form');
     const input = document.getElementById('input');
@@ -256,18 +272,16 @@
     const photoPreview = document.getElementById('photo-preview');
     const sendPhotoBtn = document.getElementById('send-photo-btn');
     const cancelPhotoBtn = document.getElementById('cancel-photo-btn');
-    const loadingSpinner = document.getElementById('loading-spinner'); // Получаем спиннер
+    const loadingSpinner = document.getElementById('loading-spinner');
     
     let selectedFile = null;
 
     function scrollToBottom() {
-      // Использование document.body.scrollHeight работает лучше, если контейнер чата растянут на весь экран
       window.scrollTo(0, document.body.scrollHeight);
     }
 
     function displayMessage(msg) {
       const item = document.createElement('li');
-      // Все сообщения выравниваются влево, как "сообщения от других"
       item.classList.add('other-message'); 
       
       const timeSpan = `<span class="timestamp">${msg.timestamp}</span>`;
