@@ -5,83 +5,82 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
   <style>
     /* ------------------------------------------------------------------ */
-    /* ОБЩИЕ СТИЛИ И ФОН (Фиолетовый паттерн) */
+    /* ОБЩИЕ СТИЛИ И ФОН */
     /* ------------------------------------------------------------------ */
-    body {
+    :root {
+      --chat-form-height: 60px; /* Фиксированная высота формы для расчета отступа */
+      --color-dark-bg: #1a0033;
+      --color-purple-dark: #3b006b;
+      --color-purple-light: #581c87;
+      --color-form-button: #c370e8;
+      --color-message-other: #4a148c;
+    }
+
+    html, body {
+      height: 100%;
       margin: 0;
+    }
+    body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       color: #e0e0e0;
       display: flex;
       flex-direction: column;
-      min-height: 100vh;
+      overflow-x: hidden;
       
-      background-color: #1a0033; 
+      /* Фиолетовый паттерн */
+      background-color: var(--color-dark-bg); 
       background-image: 
         repeating-linear-gradient(
           45deg,
-          #3b006b 0,
-          #3b006b 10px,
-          #581c87 10px, 
-          #581c87 20px
+          var(--color-purple-dark) 0,
+          var(--color-purple-dark) 10px,
+          var(--color-purple-light) 10px, 
+          var(--color-purple-light) 20px
         );
       background-size: 20px 20px;
       background-attachment: fixed;
-      overflow-x: hidden; /* Предотвращаем горизонтальный скролл */
     }
 
     /* ------------------------------------------------------------------ */
-    /* КОНТЕЙНЕР ЧАТА (Базовые стили для мобильных устройств) */
+    /* КОНТЕЙНЕР ЧАТА (Основная область сообщений) */
     /* ------------------------------------------------------------------ */
     .chat-container {
-        /* На мобильных устройствах занимает всю ширину */
+        /* Занимает всю доступную высоту между шапкой и формой */
+        flex-grow: 1; 
         width: 100%;
-        margin: 0; /* Убираем центрирование на мобильных */
-        flex-grow: 1;
-        padding-top: 10px;
-        /* Отступ внизу, чтобы форма не перекрывала последнее сообщение */
-        padding-bottom: 70px; 
-        min-height: calc(100vh - 70px); 
+        padding: 10px 0;
+        overflow-y: auto; /* Скролл только внутри контейнера сообщений */
+        /* Отступ для нижней формы */
+        padding-bottom: var(--chat-form-height);
         box-sizing: border-box;
     }
-
-    /* ------------------------------------------------------------------ */
-    /* СТИЛИ СООБЩЕНИЙ */
-    /* ------------------------------------------------------------------ */
+    
     #messages {
       list-style-type: none;
       margin: 0;
-      padding: 10px;
-      flex-grow: 1;
-      overflow-y: auto;
+      padding: 0 10px; /* Горизонтальный паддинг для мобильных */
     }
     #messages li {
       padding: 10px 15px;
       margin-bottom: 12px;
       border-radius: 18px; 
-      max-width: 85%; /* Больше ширины на мобильных */
+      max-width: 85%; /* Широкие сообщения на мобильных */
       word-wrap: break-word;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-      background-color: #4a148c; 
+      background-color: var(--color-message-other); 
       color: #e0e0e0;
       margin-right: auto;
     }
     
-    /* 📸 Красивые стили для фото */
-    .message-content {
-        /* Убеждаемся, что контейнер фото не имеет лишних отступов */
-        display: block; 
-    }
+    /* Красивые стили для фото */
     .message-content img {
       max-width: 100%;
       height: auto;
-      /* Убираем border-radius у фото, чтобы оно сливалось с bubble чата */
       border-radius: 10px; 
       margin-top: 8px;
       display: block;
-      /* Добавляем границу, чтобы фото выглядело как отдельный объект */
       border: 1px solid rgba(255, 255, 255, 0.2); 
       object-fit: cover;
-      /* Убираем тень, тень от самого сообщения достаточна */
       box-shadow: none; 
     }
     .timestamp {
@@ -92,19 +91,21 @@
       text-align: right;
     }
 
+
     /* ------------------------------------------------------------------ */
     /* ФОРМА ИНПУТА (Закреплена внизу) */
     /* ------------------------------------------------------------------ */
     #form {
       background: rgba(0, 0, 0, 0.9);
-      padding: 8px 10px; /* Уменьшаем отступы на мобильных */
+      height: var(--chat-form-height);
+      padding: 0 10px; /* Горизонтальный паддинг */
       position: fixed; 
       bottom: 0;
       left: 0;
       right: 0;
       display: flex;
       align-items: center;
-      gap: 5px; /* Уменьшаем расстояние */
+      gap: 5px;
       box-sizing: border-box;
       border-top: 1px solid rgba(255, 255, 255, 0.1);
       backdrop-filter: blur(5px);
@@ -112,7 +113,7 @@
     }
     #input {
       border: none;
-      padding: 10px 15px; /* Уменьшаем вертикальный паддинг */
+      padding: 10px 15px;
       flex-grow: 1;
       border-radius: 30px;
       background-color: rgba(255, 255, 255, 0.15);
@@ -120,12 +121,13 @@
       font-size: 1rem;
       box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4);
     }
+    #input:focus { outline: none; background-color: rgba(255, 255, 255, 0.25); }
     #form button, #form label {
-      background: #c370e8;
+      background: var(--color-form-button);
       border: none;
-      padding: 10px 15px; /* Уменьшаем паддинг кнопки */
+      padding: 10px 15px; 
       border-radius: 30px;
-      color: #1a0033;
+      color: var(--color-dark-bg);
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -135,26 +137,33 @@
       box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
       transition: background-color 0.2s ease, transform 0.1s ease;
     }
+    #form button:hover, #form label:hover { background-color: #d193ed; transform: translateY(-1px); }
+    #file-input { display: none; } 
 
     /* ------------------------------------------------------------------ */
-    /* МЕДИАЗАПРОС (Стили для экранов шире 800px - для десктопов) */
+    /* МЕДИАЗАПРОС (Стили для компьютеров/больших экранов) */
     /* ------------------------------------------------------------------ */
     @media (min-width: 800px) {
         .chat-container {
-            max-width: 800px; /* Ограничиваем ширину на десктопе */
-            margin: 0 auto; /* Центрируем на десктопе */
+            max-width: 800px; /* Ограничиваем ширину */
+            margin: 0 auto; /* Центрируем */
+            padding: 10px;
+        }
+        #messages li {
+            max-width: 65%; /* Уменьшаем ширину сообщения */
         }
         #form {
-             /* Ограничиваем ширину формы, чтобы она была только под чатом */
+            /* Фиксируем форму по центру под чат-контейнером */
             max-width: 800px;
             left: 50%;
+            right: auto;
             transform: translateX(-50%);
         }
     }
 
 
     /* ------------------------------------------------------------------ */
-    /* СТИЛИ ДЛЯ АНИМАЦИИ И ПРЕДПРОСМОТРА (оставлены, как в предыдущей версии) */
+    /* СТИЛИ ДЛЯ АНИМАЦИИ И ПРЕДПРОСМОТРА */
     /* ------------------------------------------------------------------ */
     #loading-spinner {
         position: fixed;
@@ -176,7 +185,7 @@
     .spinner-square {
         width: 50px;
         height: 50px;
-        background-color: #c370e8;
+        background-color: var(--color-form-button);
         margin-bottom: 15px;
         animation: rotateSquare 1.5s infinite ease-in-out;
     }
@@ -188,11 +197,11 @@
     
     #preview-container {
         position: fixed;
-        bottom: calc(70px + 15px); 
+        bottom: calc(var(--chat-form-height) + 15px); 
         left: 50%;
         transform: translateX(-50%);
         background-color: rgba(0, 0, 0, 0.9);
-        border: 1px solid #c370e8;
+        border: 1px solid var(--color-form-button);
         border-radius: 15px;
         padding: 15px;
         box-shadow: 0 5px 20px rgba(0, 0, 0, 0.7);
@@ -210,7 +219,7 @@
         max-height: 250px;
         border-radius: 10px;
         margin-bottom: 10px;
-        border: 2px solid #8e24aa;
+        border: 2px solid var(--color-purple-light);
         object-fit: cover;
     }
     #preview-actions { display: flex; gap: 10px; width: 100%; justify-content: center; }
@@ -277,7 +286,14 @@
     let selectedFile = null;
 
     function scrollToBottom() {
-      window.scrollTo(0, document.body.scrollHeight);
+      // Скроллим главный контейнер сообщений
+      const chatContainer = document.querySelector('.chat-container');
+      if (chatContainer) {
+          chatContainer.scrollTop = chatContainer.scrollHeight;
+      } else {
+          // Запасной вариант
+          window.scrollTo(0, document.body.scrollHeight);
+      }
     }
 
     function displayMessage(msg) {
@@ -292,7 +308,7 @@
       } else if (msg.type === 'photo') {
         content = `
           <div class="message-content">
-              <img src="${msg.url}" alt="Фото от участника">
+              <img src="${msg.url}" alt="Фото от участника" loading="lazy">
           </div>
         `;
       }
