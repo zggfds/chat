@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <title>QR Вход - Компьютер</title>
+  <title>Вход по QR (Компьютер)</title>
 </head>
 <body>
   <h1>Сканируйте QR код с телефона</h1>
@@ -17,7 +17,6 @@
       const qrDiv = document.getElementById('qr');
       const statusDiv = document.getElementById('status');
 
-      // Генерируем QR код с URL
       QRCode.toCanvas(data.url, { width: 200 }, (error, canvas) => {
         if (error) console.error(error);
         qrDiv.appendChild(canvas);
@@ -25,7 +24,6 @@
 
       statusDiv.textContent = 'Ожидание авторизации...';
 
-      // Подключаем webSocket с sessionId
       const ws = new WebSocket(`ws://${location.host}`);
 
       ws.onopen = () => {
@@ -35,8 +33,8 @@
       ws.onmessage = (event) => {
         const msg = JSON.parse(event.data);
         if (msg.type === 'authorized') {
-          statusDiv.textContent = 'Пользователь вошёл! Запуск приложения...';
-          // Здесь можно запустить приложение или показать интерфейс
+          statusDiv.textContent = 'Пользователь вошёл! Перенаправляем...';
+          window.location.href = '/account.html';
         }
       };
 

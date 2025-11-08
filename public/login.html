@@ -2,10 +2,10 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <title>Вход по QR</title>
+  <title>Страница входа</title>
 </head>
 <body>
-  <h1>Вход в систему</h1>
+  <h1>Вход в аккаунт</h1>
   <form id="loginForm">
     <input type="hidden" id="sessionId" />
     <label>Логин: <input type="text" id="username" required /></label><br />
@@ -15,7 +15,6 @@
   <div id="message"></div>
 
   <script>
-    // Получаем sessionId из URL
     const params = new URLSearchParams(window.location.search);
     const sessionId = params.get('session');
     document.getElementById('sessionId').value = sessionId;
