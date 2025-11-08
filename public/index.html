@@ -1,397 +1,51 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-  <title>Адаптивный Фиолетовый Чат</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
-  <style>
-    /* ------------------------------------------------------------------ */
-    /* ОБЩИЕ СТИЛИ И ФОН */
-    /* ------------------------------------------------------------------ */
-    :root {
-      --chat-form-height: 60px; /* Фиксированная высота формы для расчета отступа */
-      --color-dark-bg: #1a0033;
-      --color-purple-dark: #3b006b;
-      --color-purple-light: #581c87;
-      --color-form-button: #c370e8;
-      --color-message-other: #4a148c;
-    }
-
-    html, body {
-      height: 100%;
-      margin: 0;
-    }
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      color: #e0e0e0;
-      display: flex;
-      flex-direction: column;
-      overflow-x: hidden;
-      
-      /* Фиолетовый паттерн */
-      background-color: var(--color-dark-bg); 
-      background-image: 
-        repeating-linear-gradient(
-          45deg,
-          var(--color-purple-dark) 0,
-          var(--color-purple-dark) 10px,
-          var(--color-purple-light) 10px, 
-          var(--color-purple-light) 20px
-        );
-      background-size: 20px 20px;
-      background-attachment: fixed;
-    }
-
-    /* ------------------------------------------------------------------ */
-    /* КОНТЕЙНЕР ЧАТА (Основная область сообщений) */
-    /* ------------------------------------------------------------------ */
-    .chat-container {
-        /* Занимает всю доступную высоту между шапкой и формой */
-        flex-grow: 1; 
-        width: 100%;
-        padding: 10px 0;
-        overflow-y: auto; /* Скролл только внутри контейнера сообщений */
-        /* Отступ для нижней формы */
-        padding-bottom: var(--chat-form-height);
-        box-sizing: border-box;
-    }
-    
-    #messages {
-      list-style-type: none;
-      margin: 0;
-      padding: 0 10px; /* Горизонтальный паддинг для мобильных */
-    }
-    #messages li {
-      padding: 10px 15px;
-      margin-bottom: 12px;
-      border-radius: 18px; 
-      max-width: 85%; /* Широкие сообщения на мобильных */
-      word-wrap: break-word;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-      background-color: var(--color-message-other); 
-      color: #e0e0e0;
-      margin-right: auto;
-    }
-    
-    /* Красивые стили для фото */
-    .message-content img {
-      max-width: 100%;
-      height: auto;
-      border-radius: 10px; 
-      margin-top: 8px;
-      display: block;
-      border: 1px solid rgba(255, 255, 255, 0.2); 
-      object-fit: cover;
-      box-shadow: none; 
-    }
-    .timestamp {
-      font-size: 0.7em;
-      opacity: 0.7;
-      display: block;
-      margin-top: 5px;
-      text-align: right;
-    }
-
-
-    /* ------------------------------------------------------------------ */
-    /* ФОРМА ИНПУТА (Закреплена внизу) */
-    /* ------------------------------------------------------------------ */
-    #form {
-      background: rgba(0, 0, 0, 0.9);
-      height: var(--chat-form-height);
-      padding: 0 10px; /* Горизонтальный паддинг */
-      position: fixed; 
-      bottom: 0;
-      left: 0;
-      right: 0;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      box-sizing: border-box;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(5px);
-      z-index: 5;
-    }
-    #input {
-      border: none;
-      padding: 10px 15px;
-      flex-grow: 1;
-      border-radius: 30px;
-      background-color: rgba(255, 255, 255, 0.15);
-      color: #e0e0e0;
-      font-size: 1rem;
-      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4);
-    }
-    #input:focus { outline: none; background-color: rgba(255, 255, 255, 0.25); }
-    #form button, #form label {
-      background: var(--color-form-button);
-      border: none;
-      padding: 10px 15px; 
-      border-radius: 30px;
-      color: var(--color-dark-bg);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1rem;
-      font-weight: bold;
-      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
-      transition: background-color 0.2s ease, transform 0.1s ease;
-    }
-    #form button:hover, #form label:hover { background-color: #d193ed; transform: translateY(-1px); }
-    #file-input { display: none; } 
-
-    /* ------------------------------------------------------------------ */
-    /* МЕДИАЗАПРОС (Стили для компьютеров/больших экранов) */
-    /* ------------------------------------------------------------------ */
-    @media (min-width: 800px) {
-        .chat-container {
-            max-width: 800px; /* Ограничиваем ширину */
-            margin: 0 auto; /* Центрируем */
-            padding: 10px;
-        }
-        #messages li {
-            max-width: 65%; /* Уменьшаем ширину сообщения */
-        }
-        #form {
-            /* Фиксируем форму по центру под чат-контейнером */
-            max-width: 800px;
-            left: 50%;
-            right: auto;
-            transform: translateX(-50%);
-        }
-    }
-
-
-    /* ------------------------------------------------------------------ */
-    /* СТИЛИ ДЛЯ АНИМАЦИИ И ПРЕДПРОСМОТРА */
-    /* ------------------------------------------------------------------ */
-    #loading-spinner {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.7);
-        display: none; 
-        justify-content: center;
-        align-items: center;
-        flex-direction: column;
-        z-index: 100;
-        color: white;
-        font-size: 1.2rem;
-        backdrop-filter: blur(5px);
-        -webkit-backdrop-filter: blur(5px);
-    }
-    .spinner-square {
-        width: 50px;
-        height: 50px;
-        background-color: var(--color-form-button);
-        margin-bottom: 15px;
-        animation: rotateSquare 1.5s infinite ease-in-out;
-    }
-    @keyframes rotateSquare {
-        0% { transform: perspective(120px) rotateX(0deg) rotateY(0deg); }
-        50% { transform: perspective(120px) rotateX(-180deg) rotateY(0deg); }
-        100% { transform: perspective(120px) rotateX(-180deg) rotateY(-180deg); }
-    }
-    
-    #preview-container {
-        position: fixed;
-        bottom: calc(var(--chat-form-height) + 15px); 
-        left: 50%;
-        transform: translateX(-50%);
-        background-color: rgba(0, 0, 0, 0.9);
-        border: 1px solid var(--color-form-button);
-        border-radius: 15px;
-        padding: 15px;
-        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.7);
-        display: none; 
-        flex-direction: column;
-        align-items: center;
-        max-width: 90%;
-        width: 350px;
-        z-index: 10;
-        backdrop-filter: blur(8px);
-    }
-    #preview-container.active { display: flex; }
-    #photo-preview {
-        max-width: 100%;
-        max-height: 250px;
-        border-radius: 10px;
-        margin-bottom: 10px;
-        border: 2px solid var(--color-purple-light);
-        object-fit: cover;
-    }
-    #preview-actions { display: flex; gap: 10px; width: 100%; justify-content: center; }
-    #preview-actions button {
-        flex: 1;
-        padding: 10px 15px;
-        border-radius: 20px;
-        font-weight: bold;
-        cursor: pointer;
-        border: none;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    }
-    #send-photo-btn { background-color: #28a745; color: white; }
-    #send-photo-btn:hover { background-color: #218838; }
-    #cancel-photo-btn { background-color: #dc3545; color: white; }
-    #cancel-photo-btn:hover { background-color: #c82333; }
-  </style>
+  <meta charset="UTF-8" />
+  <title>QR Вход - Компьютер</title>
 </head>
 <body>
-  
-  <div class="chat-container">
-    <ul id="messages"></ul>
-  </div>
+  <h1>Сканируйте QR код с телефона</h1>
+  <div id="qr"></div>
+  <div id="status"></div>
 
-  <div id="loading-spinner">
-      <div class="spinner-square"></div>
-      <p>Загрузка фото...</p>
-  </div>
-  
-  <div id="preview-container">
-      <img id="photo-preview" src="" alt="Предпросмотр фото">
-      <div id="preview-actions">
-          <button id="cancel-photo-btn">Отмена</button>
-          <button id="send-photo-btn">Отправить</button>
-      </div>
-  </div>
-  
-  <form id="form">
-    <label for="file-input" title="Отправить фото">
-        📷
-        <input type="file" id="file-input" accept="image/*">
-    </label>
-    <input id="input" autocomplete="off" placeholder="Введите сообщение..." />
-    <button type="submit">Отправить</button>
-  </form>
-
-  <script src="/socket.io/socket.io.js"></script>
-
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
   <script>
-    // **********************************************
-    // JS-ЛОГИКА (ОСТАЕТСЯ БЕЗ ИЗМЕНЕНИЙ)
-    // **********************************************
-    const socket = io();
-    const form = document.getElementById('form');
-    const input = document.getElementById('input');
-    const messages = document.getElementById('messages');
-    const fileInput = document.getElementById('file-input');
-    const previewContainer = document.getElementById('preview-container');
-    const photoPreview = document.getElementById('photo-preview');
-    const sendPhotoBtn = document.getElementById('send-photo-btn');
-    const cancelPhotoBtn = document.getElementById('cancel-photo-btn');
-    const loadingSpinner = document.getElementById('loading-spinner');
-    
-    let selectedFile = null;
+    async function generateQR() {
+      const res = await fetch('/qr');
+      const data = await res.json();
+      const qrDiv = document.getElementById('qr');
+      const statusDiv = document.getElementById('status');
 
-    function scrollToBottom() {
-      // Скроллим главный контейнер сообщений
-      const chatContainer = document.querySelector('.chat-container');
-      if (chatContainer) {
-          chatContainer.scrollTop = chatContainer.scrollHeight;
-      } else {
-          // Запасной вариант
-          window.scrollTo(0, document.body.scrollHeight);
-      }
+      // Генерируем QR код с URL
+      QRCode.toCanvas(data.url, { width: 200 }, (error, canvas) => {
+        if (error) console.error(error);
+        qrDiv.appendChild(canvas);
+      });
+
+      statusDiv.textContent = 'Ожидание авторизации...';
+
+      // Подключаем webSocket с sessionId
+      const ws = new WebSocket(`ws://${location.host}`);
+
+      ws.onopen = () => {
+        ws.send(JSON.stringify({ type: 'register', sessionId: data.sessionId }));
+      };
+
+      ws.onmessage = (event) => {
+        const msg = JSON.parse(event.data);
+        if (msg.type === 'authorized') {
+          statusDiv.textContent = 'Пользователь вошёл! Запуск приложения...';
+          // Здесь можно запустить приложение или показать интерфейс
+        }
+      };
+
+      ws.onclose = () => {
+        statusDiv.textContent = 'Соединение закрыто.';
+      };
     }
 
-    function displayMessage(msg) {
-      const item = document.createElement('li');
-      item.classList.add('other-message'); 
-      
-      const timeSpan = `<span class="timestamp">${msg.timestamp}</span>`;
-      let content = '';
-      
-      if (msg.type === 'text') {
-        content = `${msg.text}`;
-      } else if (msg.type === 'photo') {
-        content = `
-          <div class="message-content">
-              <img src="${msg.url}" alt="Фото от участника" loading="lazy">
-          </div>
-        `;
-      }
-
-      item.innerHTML = content + timeSpan;
-      messages.appendChild(item);
-      scrollToBottom();
-    }
-
-    // Обработка отправки текстового сообщения
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      if (input.value.trim()) {
-        socket.emit('chat message', input.value.trim());
-        input.value = '';
-      }
-    });
-
-    // Логика предпросмотра фото
-    fileInput.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (file && file.type.startsWith('image/')) {
-            selectedFile = file;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                photoPreview.src = e.target.result;
-                previewContainer.classList.add('active');
-            };
-            reader.readAsDataURL(file);
-        } else if (file) {
-             alert("Пожалуйста, выберите файл-изображение.");
-        }
-        fileInput.value = '';
-    });
-
-    // Отправка фото после подтверждения (с анимацией)
-    sendPhotoBtn.addEventListener('click', async () => {
-        if (!selectedFile) return;
-
-        const formData = new FormData();
-        formData.append('photo', selectedFile);
-
-        // 1. Показываем спиннер и скрываем превью
-        loadingSpinner.style.display = 'flex';
-        previewContainer.classList.remove('active');
-
-        try {
-            const response = await fetch('/upload', {
-                method: 'POST',
-                body: formData
-            });
-
-            if (!response.ok) {
-                throw new Error('Ошибка загрузки фото на сервер.');
-            }
-
-        } catch (error) {
-            console.error('Ошибка:', error);
-            alert('Не удалось загрузить фото.');
-        } finally {
-            // 2. Скрываем спиннер и очищаем файл
-            loadingSpinner.style.display = 'none';
-            selectedFile = null;
-        }
-    });
-
-    // Отмена отправки фото
-    cancelPhotoBtn.addEventListener('click', () => {
-        previewContainer.classList.remove('active');
-        selectedFile = null;
-    });
-
-
-    // Получение истории сообщений при подключении
-    socket.on('history', (history) => {
-        messages.innerHTML = '';
-        history.forEach(msg => displayMessage(msg));
-    });
-
-    // Получение новых сообщений от сервера
-    socket.on('chat message', (msg) => {
-      displayMessage(msg);
-    });
+    generateQR();
   </script>
 </body>
 </html>
