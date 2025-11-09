@@ -114,7 +114,7 @@ button:hover {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 220px; /* высота под QR-код, можно увеличить если надо */
+   /* высота под QR-код, можно увеличить если надо */
 }
 .form-container {
   /* ... остальное как было ... */
