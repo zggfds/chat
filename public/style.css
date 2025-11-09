@@ -116,3 +116,10 @@ button:hover {
   align-items: center;
   min-height: 220px; /* высота под QR-код, можно увеличить если надо */
 }
+.form-container {
+  /* ... остальное как было ... */
+  margin: auto;
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
+}
