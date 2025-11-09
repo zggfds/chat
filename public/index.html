@@ -6,28 +6,26 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Сканируйте QR код с телефона</h1>
-  <div id="qr"></div>
-  <div id="status"></div>
-
+  <div class="floating-squares"></div>
+  <div class="form-container">
+    <h1>Сканируйте QR код с телефона</h1>
+    <div id="qr"></div>
+    <div id="status"></div>
+  </div>
   <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
   <script>
     let sessionId = null;
-
     async function generateQR() {
       const res = await fetch('/qr');
       const data = await res.json();
       sessionId = data.sessionId;
-
       QRCode.toCanvas(data.url, { width: 200 }, (error, canvas) => {
         if (error) console.error(error);
         document.getElementById('qr').appendChild(canvas);
       });
-
       document.getElementById('status').textContent = 'Ожидание входа...';
       pollStatus();
     }
-
     async function pollStatus() {
       const res = await fetch(`/status?sessionId=${sessionId}`);
       const data = await res.json();
@@ -35,11 +33,11 @@
         document.getElementById('status').textContent = 'Вход подтверждён! Перенаправляем...';
         window.location.href = '/account.html';
       } else {
-        setTimeout(pollStatus, 1000); // снова проверить через 1 сек.
+        setTimeout(pollStatus, 1000);
       }
     }
-
     generateQR();
   </script>
+  <script src="squares-bg.js"></script>
 </body>
 </html>

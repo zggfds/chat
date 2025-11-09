@@ -1,48 +1,52 @@
 body {
   margin: 0;
   font-family: 'Segoe UI', 'Arial', sans-serif;
-  background: linear-gradient(135deg, #2f80ed 0%, #56ccf2 100%);
-  color: #222;
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  box-sizing: border-box;
+  background: radial-gradient(ellipse at bottom, #292b6b 0%, #0f122e 100%);
+  color: #f8faff;
+  overflow: hidden;
+  position: relative;
 }
-
 h1 {
   font-size: 2.2rem;
   font-weight: 700;
   margin-bottom: 1.6rem;
-  color: #fff;
+  color: #cff9ff;
+  text-shadow: 0 2px 8px #101040;
 }
-
+.form-container, .account-container {
+  background: rgba(28,32,62,0.85);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.28);
+  padding: 2rem;
+  margin-top: 3rem;
+  max-width: 350px;
+  width: 100%;
+}
 label {
   font-size: 1rem;
   display: block;
   margin-bottom: 0.6rem;
-  color: #333;
+  color: #d5e5fa;
 }
-
 input[type="text"], input[type="password"] {
-  box-sizing: border-box;
   width: 100%;
   padding: 0.7rem;
   margin-bottom: 1.2rem;
   font-size: 1rem;
-  border: 1px solid #c4c4c4;
+  border: none;
   border-radius: 8px;
-  outline: none;
-  transition: border-color 0.2s;
+  background: #282d49;
+  color: #fff;
 }
-
 input[type="text"]:focus, input[type="password"]:focus {
-  border-color: #56ccf2;
+  background: #394694;
+  outline: none;
 }
-
 button {
   width: 100%;
-  background: linear-gradient(90deg, #2f80ed 0%, #56ccf2 100%);
+  background: linear-gradient(90deg,#305cff 0%,#80eaff 100%);
   color: white;
   padding: 0.85rem;
   border: none;
@@ -50,44 +54,59 @@ button {
   font-size: 1.1rem;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 2px 6px rgba(44,130,201,0.10);
   margin-top: 0.5rem;
-  transition: background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 12px #305cff14;
+  transition: background 0.3s, box-shadow 0.2s;
 }
-
 button:hover {
-  background: linear-gradient(90deg, #56ccf2 0%, #2f80ed 100%);
-  box-shadow: 0 4px 14px rgba(44,130,201,0.20);
+  background: linear-gradient(90deg, #80eaff 0%, #305cff 100%);
+  box-shadow: 0 4px 24px #3dadff40;
 }
-
 #qr canvas {
   margin: 1rem auto 2rem auto;
-  background: #fff;
+  background: rgba(44,130,201,0.08);
   border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(44,130,201,0.10);
+  box-shadow: 0 6px 24px #2f80ed20;
   display: block;
 }
-
 #status, #message {
   font-size: 1.15rem;
   color: #fff;
-  background: rgba(46, 204, 113, 0.75);
+  background: linear-gradient(90deg, #56ccf2 0%, #305cff 100%);
   padding: 0.7rem 1.3rem;
   border-radius: 12px;
   margin-top: 1rem;
   min-width: 220px;
   text-align: center;
+  box-shadow: 0 2px 12px #305cff24;
   transition: background 0.3s;
 }
-
+.floating-squares {
+  position: fixed;
+  z-index: 0;
+  left: 0; top: 0; width: 100vw; height: 100vh;
+  pointer-events: none;
+  overflow: visible;
+}
+.square {
+  position: absolute;
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #40a9ff 0%, #7bf2ff 100%);
+  opacity: 0.24;
+  border-radius: 8px;
+  box-shadow: 0 2px 14px #54afff66;
+  transition: transform 0.3s, opacity 0.3s;
+  will-change: transform, opacity;
+}
+.square.highlighted {
+  opacity: 0.95;
+  z-index: 10;
+  transform: scale(2.0) rotate(20deg);
+  border: 2px solid #fff;
+  box-shadow: 0 2px 28px #7bf2ffbb;
+}
 @media (max-width: 600px) {
-  body {
-    padding: 0 0.5rem;
-  }
-  h1 {
-    font-size: 1.5rem;
-  }
-  label, #status, #message {
-    font-size: 1rem;
-  }
+  h1 { font-size: 1.3rem; }
+  .form-container, .account-container { padding: 1rem; margin-top: 1rem; }
 }
