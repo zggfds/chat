@@ -2,43 +2,45 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <title>Вход</title>
+  <title>Регистрация</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="floating-squares"></div>
   <div class="form-container">
-    <h1>Вход</h1>
-    <form id="loginForm">
+    <h1>Регистрация</h1>
+    <form id="registerForm">
+      <label>Имя: <input type="text" id="name" required /></label><br />
       <label>Email: <input type="email" id="email" required /></label><br />
       <label>Пароль: <input type="password" id="password" required /></label><br />
-      <button type="submit">Войти</button>
+      <button type="submit">Зарегистрироваться</button>
     </form>
     <div id="message"></div>
-    <a href="register.html">Нет аккаунта?</a>
+    <a href="index.html">Вход</a>
   </div>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
   <script src="firebase-config.js"></script>
   <script src="squares-bg.js"></script>
   <script>
-    const form = document.getElementById('loginForm');
+    const regForm = document.getElementById('registerForm');
     const msg = document.getElementById('message');
-    form.addEventListener('submit', async e => {
+    regForm.addEventListener('submit', async e => {
       e.preventDefault();
+      const name = document.getElementById('name').value;
       const email = document.getElementById('email').value;
       const pass = document.getElementById('password').value;
       try {
-        await auth.signInWithEmailAndPassword(email, pass);
-        msg.textContent = "Вход успешен!";
-        setTimeout(() => location.href="profile.html", 1200);
+        const userCred = await auth.createUserWithEmailAndPassword(email, pass);
+        await db.collection('profiles').doc(userCred.user.uid).set({ name, email });
+        await userCred.user.updateProfile({ displayName: name });
+        msg.textContent = "Регистрация успешна!";
+        setTimeout(() => location.href="index.html", 1200);
       } catch(err) {
         msg.textContent = err.message;
       }
     });
-
-    // если уже залогинен, переходим на профиль:
-    auth.onAuthStateChanged(user => { if (user) location.href="profile.html"; });
   </script>
 </body>
 </html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>Профиль</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="floating-squares"></div>
+  <div class="account-container" id="profileBox">
+    <h1>Профиль</h1>
+    <div id="profile-info"></div>
+    <button id="edit">Редактировать имя</button>
+    <button id="logout">Выйти</button>
+  </div>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="squares-bg.js"></script>
+  <script>
+    auth.onAuthStateChanged(async user => {
+      if (!user) return location.href = "index.html";
+      const profDiv = document.getElementById('profile-info');
+      let profile = await db.collection('profiles').doc(user.uid).get();
+      if(profile.exists) {
+        let data = profile.data();
+        profDiv.innerHTML = `<b>Имя:</b> <span id="username">${data.name || user.displayName}</span><br>
+                             <b>Email:</b> ${data.email}`;
+      }
+
+      document.getElementById('edit').onclick = async () => {
+        let newName = prompt("Введите новое имя:", document.getElementById('username').textContent);
+        if (newName) {
+          await db.collection('profiles').doc(user.uid).update({ name: newName });
+          await user.updateProfile({ displayName: newName });
+          document.getElementById('username').textContent = newName;
+        }
+      };
+      document.getElementById('logout').onclick = () => {
+        auth.signOut().then(()=>location.href='index.html');
+      };
+    });
+  </script>
+</body>
+</html>
