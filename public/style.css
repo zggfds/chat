@@ -110,12 +110,7 @@ button:hover {
   h1 { font-size: 1.3rem; }
   .form-container, .account-container { padding: 1rem; margin-top: 1rem; }
 }
-#qr {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-   /* высота под QR-код, можно увеличить если надо */
-}
+
 .form-container {
   /* ... остальное как было ... */
   margin: auto;
